@@ -1,0 +1,59 @@
+import com.sun.corba.se.spi.orbutil.closure.Closure
+
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.3.3'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
+
+task execute {
+    dependsOn 'launchTest'
+
+    doLast {
+        println "- Tests were executed "
+    }
+}
+
+execute.finalizedBy ":backend:appengineStop"
+
+task launchTest {
+    dependsOn ':backend:appengineRun'
+    project(":backend").afterEvaluate { backend ->
+        backend.extensions.appengine.daemon = true
+    }
+
+    doLast {
+        println "- Server is up and running :) "
+    }
+}
+
+launchTest.finalizedBy ":app:connectedAndroidTest"
+
+/*
+    This task was created to launch the emulator
+
+    Note: If you replace the values and run it should launch the emulator
+
+    workingDir: Needs to be set to your Android tools
+    args: Parameters to run the emulator in this case -avd and the "name"
+    executable: The app to be called
+*/
+task initializeEmulator(type: Exec) {
+    workingDir = '../../../../Library/Android/sdk/tools'
+    args '-avd', 'Nexus_4_API_25'
+    executable('emulator')
+}
